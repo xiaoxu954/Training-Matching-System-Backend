@@ -1,7 +1,6 @@
-package com.xiaoxu.provider;
+package com.xiaoxu.service.provider;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.xiaoxu.commom.ErrorCode;
@@ -30,29 +29,29 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
     public static final String SALT = "xiaoxu";
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public String userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            throw  new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+
+            return ErrorCode.MESSAGE_NULL.getMessage();
         }
         if (userAccount.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
+            return ErrorCode.ACCOUNT_TOO_SHIRT.getMessage();
         }
         if (userPassword.length() < 6 || checkPassword.length() < 6) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
+            return ErrorCode.PASSWORD_TOO_SHIRT.getMessage();
         }
         // 密码和校验密码相同
         if (!userPassword.equals(checkPassword)) {
-            return new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致").getCode();
+            return ErrorCode.TWO_PASSWORD_NOT_SAME.getMessage();
         }
         synchronized (userAccount.intern()) {
 
-            User dataUserAccount = DAO.findFirstByColumns(Columns.create("userAccount", userAccount));
-
-            System.out.println("dataUserAccount = " + dataUserAccount.getUserAccount());
             // 账户不能重复
-            if (userAccount.equals(dataUserAccount.getUserAccount())) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
+            long count = findCountByColumns(Columns.create("userAccount", userAccount));
+
+            if (count > 0) {
+                return ErrorCode.ACCOUNT_EXIST.getMessage();
             }
 
             // 2. 加密
@@ -61,10 +60,8 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
             User user = new User();
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
-
             this.save(user);
-
-            return user.getId();
+            return user.getId().toString();
         }
     }
 
@@ -101,7 +98,13 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
             return null;
         }
         LoginUserVO loginUserVO = new LoginUserVO();
-        BeanUtil.copyProperties(user, loginUserVO);
+        loginUserVO.setId(user.getId());
+        loginUserVO.setUserName(user.getUserName());
+        loginUserVO.setUserAvatar(user.getUserAvatar());
+        loginUserVO.setUserProfile(user.getUserProfile());
+        loginUserVO.setUserRole(user.getUserRole());
+        loginUserVO.setCreateTime(user.getCreateTime());
+        loginUserVO.setUpdateTime(user.getUpdateTime());
         return loginUserVO;
     }
 
@@ -111,7 +114,12 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
             return null;
         }
         UserVO userVO = new UserVO();
-        BeanUtil.copyProperties(user, userVO);
+        userVO.setId(user.getId());
+        userVO.setUserName(user.getUserName());
+        userVO.setUserProfile(user.getUserProfile());
+        userVO.setUserAvatar(user.getUserAvatar());
+        userVO.setUserRole(user.getUserRole());
+        userVO.setCreateTime(user.getCreateTime());
         return userVO;
     }
 
@@ -121,5 +129,29 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
             return new ArrayList<>();
         }
         return userList.stream().map(this::getUserVO).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取当前登录用户
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+
+        // 先判断是否已登录
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        if (currentUser == null || currentUser.getId() == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        // 从数据库查询（追求性能的话可以注释，直接走缓存）
+        long userId = currentUser.getId();
+        currentUser = this.findById(userId);
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return currentUser;
     }
 }

@@ -179,15 +179,17 @@ public interface UserService {
 
     /**
      * 用户注册
+     *
      * @param userAccount
      * @param userPassword
      * @param checkPassword
      * @return
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword);
+    String userRegister(String userAccount, String userPassword, String checkPassword);
 
     /**
      * 用户登录
+     *
      * @param userAccount
      * @param userPassword
      * @param request
@@ -201,6 +203,7 @@ public interface UserService {
      * @return
      */
     LoginUserVO getLoginUserVO(User user);
+
     /**
      * 获取脱敏的用户信息
      *
@@ -208,6 +211,7 @@ public interface UserService {
      * @return
      */
     UserVO getUserVO(User user);
+
     /**
      * 获取脱敏的用户信息
      *
@@ -215,4 +219,13 @@ public interface UserService {
      * @return
      */
     List<UserVO> getUserVO(List<User> userList);
+
+    /**
+     * 获取当前登录用户
+     *
+     * @param request
+     * @return
+     */
+
+    User getLoginUser(HttpServletRequest request);
 }

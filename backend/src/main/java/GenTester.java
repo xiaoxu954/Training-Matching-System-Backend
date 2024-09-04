@@ -1,5 +1,4 @@
-package com.xiaoxu;
-
+import io.jboot.app.JbootApplication;
 import io.jboot.codegen.CodeGenHelpler;
 import io.jboot.codegen.model.JbootBaseModelGenerator;
 import io.jboot.codegen.model.JbootModelGenerator;
@@ -11,6 +10,10 @@ public class GenTester {
     public static void main(String[] args) {
 
         //配置数据量的连接信息，可以通过 JbootApplication.setBootArg 来配置
+        //也可以在 jboot.properties 里配置
+        JbootApplication.setBootArg("jboot.datasource.url", "jdbc:mysql://127.0.0.1:3306/db_shixun");
+        JbootApplication.setBootArg("jboot.datasource.user", "root");
+        JbootApplication.setBootArg("jboot.datasource.password", "1234");
 
 
         String modelPackage = "io.jboot.test.codegen.model"; //生成的Model的包名

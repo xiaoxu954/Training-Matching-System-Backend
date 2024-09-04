@@ -1,6 +1,7 @@
 package com.xiaoxu.controller;
 
 import com.jfinal.ext.cors.EnableCORS;
+import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import io.jboot.web.controller.JbootController;
@@ -8,15 +9,19 @@ import io.jboot.web.controller.annotation.RequestMapping;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static com.xiaoxu.commom.Token.Token;
+
 @EnableCORS
 @RequestMapping("/")
 public class IndexController extends JbootController {
 
     public void index() {
         getResponse().setHeader("Access-Control-Allow-Origin", "*");
-        renderText("Hello World Jboot");
+        renderText(String.valueOf(Ret.ok("data", "Hello World Jboot").set("token", Token)));
     }
-    public void dbtest(){
+
+    public void dbtest() {
         List<Record> records = Db.find("select * from user");
         renderJson(Arrays.toString(records.toArray()));
     }
