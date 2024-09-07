@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -301,8 +302,6 @@ public class UserController extends JbootController {
 
     /**
      * 获取当前登录用户
-     *
-     * @return
      */
     @ApiOperation(value = "获取当前登录用户", httpMethod = "Get", notes = "获取当前登录用户")
     public void getLoginUser() {
@@ -310,5 +309,16 @@ public class UserController extends JbootController {
         renderJson(Ret.ok("data", userService.getLoginUserVO(user)));
     }
 
-
+    /**
+     * 用户注销
+     */
+    @ApiOperation(value = "注销当前登录用户", httpMethod = "Post", notes = "退出当前登录用户")
+    public void userLogout() {
+        HttpServletRequest request = getRequest();
+        if (request == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = userService.userLogout(request);
+        renderJson(Ret.ok("data", result));
+    }
 }

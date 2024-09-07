@@ -228,4 +228,6 @@ public interface UserService {
      */
 
     User getLoginUser(HttpServletRequest request);
+
+    boolean userLogout(HttpServletRequest request);
 }
