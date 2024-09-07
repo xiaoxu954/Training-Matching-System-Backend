@@ -10,7 +10,6 @@ import io.jboot.web.controller.annotation.RequestMapping;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.xiaoxu.commom.Token.Token;
 
 @EnableCORS
 @RequestMapping("/")
@@ -18,7 +17,7 @@ public class IndexController extends JbootController {
 
     public void index() {
         getResponse().setHeader("Access-Control-Allow-Origin", "*");
-        renderText(String.valueOf(Ret.ok("data", "Hello World Jboot").set("token", Token)));
+        renderText(String.valueOf(Ret.ok("data", "Hello World Jboot")));
     }
 
     public void dbtest() {

@@ -32,26 +32,26 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
     public String userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-
-            return ErrorCode.MESSAGE_NULL.getMessage();
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         if (userAccount.length() < 4) {
-            return ErrorCode.ACCOUNT_TOO_SHIRT.getMessage();
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
         }
-        if (userPassword.length() < 6 || checkPassword.length() < 6) {
-            return ErrorCode.PASSWORD_TOO_SHIRT.getMessage();
+        if (userPassword.length() < 8 || checkPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
         }
         // 密码和校验密码相同
         if (!userPassword.equals(checkPassword)) {
-            return ErrorCode.TWO_PASSWORD_NOT_SAME.getMessage();
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
         }
+
         synchronized (userAccount.intern()) {
 
             // 账户不能重复
             long count = findCountByColumns(Columns.create("userAccount", userAccount));
 
             if (count > 0) {
-                return ErrorCode.ACCOUNT_EXIST.getMessage();
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
             }
 
             // 2. 加密
@@ -76,6 +76,7 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         }
         if (userPassword.length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+
         }
         // 2. 加密
         String encryptPassword = MD5.create().digestHex((SALT + userPassword).getBytes());
@@ -84,12 +85,13 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
 
         // 用户不存在
         if (dataUser == null) {
-//            log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 3. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, dataUser);
-        return this.getLoginUserVO(dataUser);
+        // 4. 返回结果
+        LoginUserVO loginUserVO = this.getLoginUserVO(dataUser);
+        return loginUserVO;
     }
 
     @Override
@@ -120,6 +122,7 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         userVO.setUserAvatar(user.getUserAvatar());
         userVO.setUserRole(user.getUserRole());
         userVO.setCreateTime(user.getCreateTime());
+        userVO.setUpdateTime(user.getUpdateTime());
         return userVO;
     }
 

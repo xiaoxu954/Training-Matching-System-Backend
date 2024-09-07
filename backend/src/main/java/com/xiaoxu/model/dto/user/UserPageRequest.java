@@ -1,24 +1,24 @@
 package com.xiaoxu.model.dto.user;
 
-
-import com.jfinal.plugin.activerecord.Page;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
 /**
- * 用户查询请求
+ * 用户分页请求
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class UserQueryRequest extends Page implements Serializable {
+public class UserPageRequest implements Serializable {
 
     /**
      * id
      */
     private Long id;
 
+    /**
+     * 用户账号
+     */
+    private String userAccount;
 
     /**
      * 用户昵称
@@ -34,6 +34,9 @@ public class UserQueryRequest extends Page implements Serializable {
      * 用户角色：user/admin/ban
      */
     private String userRole;
+
+    private Integer current;
+    private Integer pageSize;
 
     private static final long serialVersionUID = 1L;
 }
