@@ -302,6 +302,8 @@ public class UserController extends JbootController {
 
     /**
      * 获取当前登录用户
+     *
+     * @return
      */
     @ApiOperation(value = "获取当前登录用户", httpMethod = "Get", notes = "获取当前登录用户")
     public void getLoginUser() {
