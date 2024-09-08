@@ -29,7 +29,7 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
     }
 
     @Override
-    public List<TeamUserVO> listTeams(TeamQueryRequest teamQueryRequest, boolean isAdmin) {
+    public List<TeamUserVO> listTeam(TeamQueryRequest teamQueryRequest, boolean isAdmin) {
         return Collections.emptyList();
     }
 

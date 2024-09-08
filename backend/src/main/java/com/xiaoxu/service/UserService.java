@@ -185,7 +185,7 @@ public interface UserService {
      * @param checkPassword
      * @return
      */
-    String userRegister(String userAccount, String userPassword, String checkPassword);
+    long userRegister(String userAccount, String userPassword, String checkPassword);
 
     /**
      * 用户登录
@@ -236,6 +236,7 @@ public interface UserService {
      * @return
      */
     boolean userLogout(HttpServletRequest request);
+
 
     /**
      * 是否为管理员

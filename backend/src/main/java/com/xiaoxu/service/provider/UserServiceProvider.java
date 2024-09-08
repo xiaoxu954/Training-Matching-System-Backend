@@ -30,7 +30,7 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
     public static final String SALT = "xiaoxu";
 
     @Override
-    public String userRegister(String userAccount, String userPassword, String checkPassword) {
+    public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -62,23 +62,14 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
             this.save(user);
-            return user.getId().toString();
+            return user.getId();
         }
     }
 
     @Override
     public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request) {
-        // 1. 校验
-        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
-        }
-        if (userAccount.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
-        }
-        if (userPassword.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
 
-        }
+        // 1. 校验
         // 2. 加密
         String encryptPassword = MD5.create().digestHex((SALT + userPassword).getBytes());
         // 查询用户是否存在
@@ -92,7 +83,9 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         request.getSession().setAttribute(USER_LOGIN_STATE, dataUser);
         // 4. 返回结果
         LoginUserVO loginUserVO = this.getLoginUserVO(dataUser);
+
         return loginUserVO;
+
     }
 
     @Override
@@ -194,4 +187,6 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
     public boolean isAdmin(User loginUser) {
         return loginUser != null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
     }
+
+
 }

@@ -7,8 +7,8 @@ import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Page;
 import com.xiaoxu.commom.DeleteRequest;
 import com.xiaoxu.commom.ErrorCode;
-import com.xiaoxu.commom.UserConstant;
 import com.xiaoxu.exception.BusinessException;
+import com.xiaoxu.exception.ThrowUtils;
 import com.xiaoxu.model.dto.user.*;
 import com.xiaoxu.model.entity.User;
 import com.xiaoxu.model.vo.LoginUserVO;
@@ -17,6 +17,8 @@ import com.xiaoxu.service.UserService;
 import io.jboot.db.model.Columns;
 import io.jboot.support.swagger.ParamType;
 import io.jboot.web.controller.JbootController;
+import io.jboot.web.controller.annotation.GetRequest;
+import io.jboot.web.controller.annotation.PostRequest;
 import io.jboot.web.controller.annotation.RequestMapping;
 import io.jboot.web.json.JsonBody;
 import io.swagger.annotations.Api;
@@ -26,7 +28,6 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.xiaoxu.commom.ErrorCode.PARAMS_ERROR;
@@ -36,7 +37,7 @@ import static com.xiaoxu.service.provider.UserServiceProvider.SALT;
 @EnableCORS
 //@EnableJwt
 @RequestMapping("/api/user")
-//@Path("/user")
+//@Before(UserValidator.class)
 @Api(description = "用户相关API", tags = "用户接口")
 public class UserController extends JbootController {
 
@@ -48,13 +49,13 @@ public class UserController extends JbootController {
     /**
      * 用户注册
      */
+    @PostRequest
     @ApiOperation(value = "用户注册", httpMethod = "Post", notes = "用户注册")
     @ApiImplicitParams({
             @ApiImplicitParam(value = "userAccount", paramType = ParamType.FORM, dataType = "string", required = true),
             @ApiImplicitParam(value = "userPassword", paramType = ParamType.FORM, dataType = "string", required = true),
             @ApiImplicitParam(value = "checkPassword", paramType = ParamType.FORM, dataType = "string", required = true)})
     public void userRegister(@JsonBody UserRegisterRequest userRegisterRequest) {
-
         if (userRegisterRequest == null) {
             renderJson(Ret.fail("msg", PARAMS_ERROR));
         }
@@ -67,29 +68,23 @@ public class UserController extends JbootController {
             renderJson(Ret.fail("msg", PARAMS_ERROR));
         }
 
-        String result = userService.userRegister(userAccount, userPassword, checkPassword);
-        renderJson(Ret.ok("msg", result));
+        long userId = userService.userRegister(userAccount, userPassword, checkPassword);
+
+        renderJson(Ret.ok("data", userId));
     }
 
     /**
      * 用户登录
      */
+    @PostRequest
     @ApiOperation(value = "用户登录", httpMethod = "Post", notes = "用户登录")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userAccount", value = "用户账户", paramType = ParamType.FORM, dataType = "string", required = true),
             @ApiImplicitParam(name = "userPassword", value = "用户密码", paramType = ParamType.FORM, dataType = "string", required = true)})
-    public void userLogin(@JsonBody UserLoginRequest userLoginRequest) {
-        System.out.println("userLoginRequest = " + userLoginRequest);
-        if (userLoginRequest == null) {
-            renderJson(Ret.fail("msg", PARAMS_ERROR));
-        }
 
+    public void userLogin(@JsonBody UserLoginRequest userLoginRequest) {
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
-        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            renderJson(Ret.fail("msg", PARAMS_ERROR));
-        }
-
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, getRequest());
         renderJson(Ret.ok("data", loginUserVO));
     }
@@ -97,7 +92,7 @@ public class UserController extends JbootController {
 
     // region 增删改查
 
-
+    @PostRequest
     @ApiOperation(value = "添加用户", httpMethod = "Post", notes = "添加用户")
     @ApiImplicitParams({@ApiImplicitParam(name = "userAccount", value = "用户账户", paramType = ParamType.FORM, dataType = "string", required = true),
             @ApiImplicitParam(name = "userPassword", value = "用户密码", paramType = ParamType.FORM, dataType = "string", required = true),
@@ -127,6 +122,7 @@ public class UserController extends JbootController {
     /**
      * 删除用户
      */
+    @PostRequest
     @ApiOperation(value = "删除用户", httpMethod = "Post", notes = "删除用户")
     @ApiImplicitParam(name = "id", value = "用户id", paramType = ParamType.QUERY, dataType = "int", required = true)
     public void deleteUser(@JsonBody DeleteRequest DeleteRequest) {
@@ -141,7 +137,7 @@ public class UserController extends JbootController {
     /**
      * 更新用户
      */
-
+    @PostRequest
     @ApiOperation(value = "更新用户", httpMethod = "Post", notes = "更新用户")
     @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "用户id", paramType = ParamType.FORM, dataType = "int", required = true),
             @ApiImplicitParam(name = "userName", value = "用户名", paramType = ParamType.FORM, dataType = "string", required = true),
@@ -171,6 +167,7 @@ public class UserController extends JbootController {
     /**
      * 更新个人信息
      */
+    @PostRequest
     @ApiOperation(value = "更新个人信息", httpMethod = "Post", notes = "更新个人信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userName", value = "用户名", paramType = ParamType.FORM, dataType = "string", required = true),
@@ -198,42 +195,38 @@ public class UserController extends JbootController {
      * @param id
      * @return
      */
+    @GetRequest
     @ApiOperation(value = "根据 id 获取用户（仅管理员）", httpMethod = "Get", notes = "根据 id 获取用户（仅管理员）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "用户id", paramType = ParamType.QUERY, dataType = "int", required = true)})
     public void getUserById(long id) {
         if (id <= 0) {
-            renderJson(Ret.fail("msg", PARAMS_ERROR));
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        User user = userService.findById(id);
         User loginUser = userService.getLoginUser(getRequest());
-        if (loginUser.getUserRole() != UserConstant.ADMIN_ROLE) {
-            renderJson(Ret.fail("msg", "无权限"));
-        } else {
-            User user = userService.findById(id);
-            renderJson(Ret.ok("data", user));
-        }
+        ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
+        renderJson(Ret.ok("msg", user));
 
     }
 
     /**
-     * 根据 id 获取用户
+     * 根据 id 获取用户（脱敏）
      *
      * @param id
      * @return
      */
+    @GetRequest
     @ApiOperation(value = "根据 id 获取用户（脱敏）", httpMethod = "Get", notes = "根据 id 获取用户")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "用户id", paramType = ParamType.QUERY, dataType = "int", required = true)})
     public void getUserVoById(long id) {
         if (id <= 0) {
-            renderJson(Ret.fail("msg", PARAMS_ERROR));
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.findById(id);
-        UserVO userVO = userService.getUserVO(user);
-
-        renderJson(Ret.ok("data", userVO));
-
-
+        ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
+        renderJson(Ret.ok("data", (userService.getUserVO(user))));
     }
 
 
@@ -242,7 +235,7 @@ public class UserController extends JbootController {
      *
      * @param columns
      */
-
+    @PostRequest
     @ApiOperation(value = "根据条件查询用户", httpMethod = "Post", notes = "根据条件查询用户")
     public void findUserByColumns(Columns columns) {
         User firstByColumns = userService.findFirstByColumns(columns);
@@ -253,6 +246,7 @@ public class UserController extends JbootController {
     /**
      * 查询所有用户
      */
+    @GetRequest
     @ApiOperation(value = "查询所有用户", httpMethod = "Get", notes = "查询所有用户")
     @ApiImplicitParams(
             @ApiImplicitParam(name = "id", value = "用户id", paramType = ParamType.QUERY, dataType = "int", required = true))
@@ -265,6 +259,7 @@ public class UserController extends JbootController {
     /**
      * 分页查询用户
      */
+    @PostRequest
     @ApiOperation(value = "分页查询用户", httpMethod = "Post", notes = "分页查询用户")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "current", value = "当前页", paramType = ParamType.QUERY, dataType = "int", required = true),
@@ -276,29 +271,29 @@ public class UserController extends JbootController {
             @ApiImplicitParam(name = "userAvatar", value = "用户头像", paramType = ParamType.QUERY, dataType = "String", required = true),
     })
 
-
     public void findUserByPage(@JsonBody UserPageRequest userPageRequest) {
-//        String rawData = getRawData();
-//        System.out.println("rawData = " + rawData);
-
         int current = userPageRequest.getCurrent();
         int pageSize = userPageRequest.getPageSize();
         Columns columns = new Columns();
         columns.eq("id", userPageRequest.getId());
         columns.eq("userAccount", userPageRequest.getUserAccount());
-
-//        if (current == null || pageSize == null) {
-//            renderJson(Ret.fail("msg", PARAMS_ERROR));
-//        }
         Page<User> userPage = userService.paginateByColumns(current, pageSize, columns);
-        List<UserVO> userVOS = new ArrayList<>();
-        List<User> list = userPage.getList();
-        for (User user : list) {
-            userVOS.add(userService.getUserVO(user));
-        }
-        Page<UserVO> userPageVOS = new Page<>();
-        userPageVOS.setList(userVOS);
-        renderJson(Ret.ok("data", userPageVOS));
+        renderJson(Ret.ok("data", userPage));
+    }
+
+    public void findUserVoByPage(@JsonBody UserPageRequest userPageRequest) {
+        int current = userPageRequest.getCurrent();
+        int pageSize = userPageRequest.getPageSize();
+        Columns columns = new Columns();
+        columns.eq("id", userPageRequest.getId());
+        columns.eq("userAccount", userPageRequest.getUserAccount());
+        columns.eq("userName", userPageRequest.getUserName());
+        columns.eq("userProfile", userPageRequest.getUserProfile());
+
+        Page<User> userPage = userService.paginateByColumns(current, pageSize, columns);
+        List<UserVO> userVO = userService.getUserVO(userPage.getList());
+        System.out.println("userVO = " + userVO);
+        renderJson(Ret.ok("data", userVO));
     }
 
     /**
@@ -306,15 +301,17 @@ public class UserController extends JbootController {
      *
      * @return
      */
+    @GetRequest
     @ApiOperation(value = "获取当前登录用户", httpMethod = "Get", notes = "获取当前登录用户")
     public void getLoginUser() {
         User user = userService.getLoginUser(getRequest());
-        renderJson(Ret.ok("data", userService.getLoginUserVO(user)));
+        renderJson(userService.getLoginUserVO(user));
     }
 
     /**
      * 用户注销
      */
+    @PostRequest
     @ApiOperation(value = "注销当前登录用户", httpMethod = "Post", notes = "退出当前登录用户")
     public void userLogout() {
         HttpServletRequest request = getRequest();

@@ -207,7 +207,7 @@ public interface TeamService {
      * @param isAdmin
      * @return
      */
-    public List<TeamUserVO> listTeams(TeamQueryRequest teamQueryRequest, boolean isAdmin);
+    public List<TeamUserVO> listTeam(TeamQueryRequest teamQueryRequest, boolean isAdmin);
 
     /**
      * 加入队伍

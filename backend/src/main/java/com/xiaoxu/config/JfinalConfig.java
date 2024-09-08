@@ -3,14 +3,15 @@ package com.xiaoxu.config;
 import com.jfinal.config.*;
 import com.jfinal.template.Engine;
 
-public class YourJFinalConfig extends JFinalConfig {
+public class JfinalConfig extends JFinalConfig {
     @Override
     public void configConstant(Constants constants) {
+
     }
 
     @Override
     public void configRoute(Routes routes) {
-        routes.scan("com.xiaoxu.controller");
+
     }
 
     @Override
@@ -25,16 +26,16 @@ public class YourJFinalConfig extends JFinalConfig {
 
     @Override
     public void configInterceptor(Interceptors interceptors) {
+//        interceptors.add(new SessionInViewInterceptor());
 
-        // todo 添加业务层全局拦截器
-//        interceptors.addGlobalServiceInterceptor(new GlobalServiceInterceptor());
+        //自定义异常拦截器
+        interceptors.add(new ExceptionInterceptor());
+
 
     }
-
 
     @Override
     public void configHandler(Handlers handlers) {
 
     }
-
 }

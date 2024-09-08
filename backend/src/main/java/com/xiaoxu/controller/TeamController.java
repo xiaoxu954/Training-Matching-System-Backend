@@ -90,7 +90,7 @@ public class TeamController extends JbootController {
     }
 
 
-    public void listTeams(TeamQueryRequest teamQueryRequest) {
+    public void listTeam(TeamQueryRequest teamQueryRequest) {
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -98,7 +98,7 @@ public class TeamController extends JbootController {
 
         boolean isAdmin = userService.isAdmin(request);
         // 1、查询队伍列表
-        List<TeamUserVO> teamList = teamService.listTeams(teamQueryRequest, isAdmin);
+        List<TeamUserVO> teamList = teamService.listTeam(teamQueryRequest, isAdmin);
         // 2、判断当前用户是否已加入队伍
         List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
 
@@ -129,7 +129,7 @@ public class TeamController extends JbootController {
     }
 
     //查询分页
-    public BaseResponse<Page<Team>> listPageTeams(TeamQueryRequest teamQueryRequest) {
+    public BaseResponse<Page<Team>> listTeamByPage(TeamQueryRequest teamQueryRequest) {
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -194,7 +194,7 @@ public class TeamController extends JbootController {
         HttpServletRequest request = getRequest();
         User loginUser = userService.getLoginUser(request);
         teamQueryRequest.setUserId(loginUser.getId());
-        List<TeamUserVO> teamList = teamService.listTeams(teamQueryRequest, true);
+        List<TeamUserVO> teamList = teamService.listTeam(teamQueryRequest, true);
 
 
         // 2、判断当前用户是否已加入队伍
@@ -231,7 +231,7 @@ public class TeamController extends JbootController {
         Map<Long, List<UserTeam>> listMap = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
         List<Long> idList = new ArrayList<>(listMap.keySet());
         teamQueryRequest.setIdList(idList);
-        List<TeamUserVO> teamList = teamService.listTeams(teamQueryRequest, true);
+        List<TeamUserVO> teamList = teamService.listTeam(teamQueryRequest, true);
         List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
         // 3、查询已加入队伍的人数
 //        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
