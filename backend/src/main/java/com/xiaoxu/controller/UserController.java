@@ -5,6 +5,7 @@ import com.jfinal.aop.Inject;
 import com.jfinal.ext.cors.EnableCORS;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Page;
+import com.xiaoxu.commom.DeleteRequest;
 import com.xiaoxu.commom.ErrorCode;
 import com.xiaoxu.commom.UserConstant;
 import com.xiaoxu.exception.BusinessException;
@@ -128,8 +129,8 @@ public class UserController extends JbootController {
      */
     @ApiOperation(value = "删除用户", httpMethod = "Post", notes = "删除用户")
     @ApiImplicitParam(name = "id", value = "用户id", paramType = ParamType.QUERY, dataType = "int", required = true)
-    public void deleteUser(@JsonBody UserDeleteRequest userDeleteRequest) {
-        boolean result = userService.deleteById(userDeleteRequest.getId());
+    public void deleteUser(@JsonBody DeleteRequest DeleteRequest) {
+        boolean result = userService.deleteById(DeleteRequest.getId());
         if (result) {
             renderJson(Ret.ok("data", result));
         } else {

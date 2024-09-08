@@ -4,6 +4,7 @@ package com.xiaoxu.service.provider;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.xiaoxu.commom.ErrorCode;
+import com.xiaoxu.commom.UserConstant;
 import com.xiaoxu.exception.BusinessException;
 import com.xiaoxu.model.entity.User;
 import com.xiaoxu.model.vo.LoginUserVO;
@@ -118,6 +119,7 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         UserVO userVO = new UserVO();
         userVO.setId(user.getId());
         userVO.setUserName(user.getUserName());
+        userVO.setUserAccount(user.getUserAccount());
         userVO.setUserProfile(user.getUserProfile());
         userVO.setUserAvatar(user.getUserAvatar());
         userVO.setUserRole(user.getUserRole());
@@ -166,5 +168,30 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         // 移除登录态
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return true;
+    }
+
+    /**
+     * 是否为管理员
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        // 仅管理员可查询
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return user != null && user.getUserRole() == UserConstant.ADMIN_ROLE;
+    }
+
+    /**
+     * 是否为管理员
+     *
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public boolean isAdmin(User loginUser) {
+        return loginUser != null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
     }
 }
