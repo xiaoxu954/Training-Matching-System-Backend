@@ -108,6 +108,20 @@ public abstract class BaseUser<M extends BaseUser<M>> extends JbootModel<M> impl
     }
 
     /**
+     * 用户标签
+     */
+    public void setTags(java.lang.String tags) {
+        set("tags", tags);
+    }
+
+    /**
+     * 用户标签
+     */
+    public java.lang.String getTags() {
+        return getStr("tags");
+    }
+
+    /**
      * 创建时间
      */
     public void setCreateTime(java.util.Date createTime) {

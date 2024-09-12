@@ -57,7 +57,7 @@ public class ExceptionInterceptor implements Interceptor {
         Integer code = e.getCode();
         String message = e.getMessage();
 
-        return Ret.fail("msg", message).set("code", code);
+        return Ret.fail("message", message).set("code", code);
     }
 
 }

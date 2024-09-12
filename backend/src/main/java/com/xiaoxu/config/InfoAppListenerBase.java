@@ -6,6 +6,7 @@ import io.jboot.aop.jfinal.JfinalHandlers;
 import io.jboot.core.listener.JbootAppListenerBase;
 
 public class InfoAppListenerBase extends JbootAppListenerBase {
+
     @Override
     public void onRouteConfig(Routes routes) {
         super.onRouteConfig(routes);

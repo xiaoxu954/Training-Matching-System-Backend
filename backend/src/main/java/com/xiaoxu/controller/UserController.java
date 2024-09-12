@@ -33,11 +33,10 @@ import java.util.List;
 import static com.xiaoxu.commom.ErrorCode.PARAMS_ERROR;
 import static com.xiaoxu.service.provider.UserServiceProvider.SALT;
 
-
-@EnableCORS
 //@EnableJwt
-@RequestMapping("/api/user")
 //@Before(UserValidator.class)
+@EnableCORS(allowOrigin = "http://localhost:3002")
+@RequestMapping("/api/user")
 @Api(description = "用户相关API", tags = "用户接口")
 public class UserController extends JbootController {
 
@@ -57,7 +56,7 @@ public class UserController extends JbootController {
             @ApiImplicitParam(value = "checkPassword", paramType = ParamType.FORM, dataType = "string", required = true)})
     public void userRegister(@JsonBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
-            renderJson(Ret.fail("msg", PARAMS_ERROR));
+            renderJson(Ret.fail("message", PARAMS_ERROR));
         }
 
         String userAccount = userRegisterRequest.getUserAccount();
@@ -65,7 +64,7 @@ public class UserController extends JbootController {
         String checkPassword = userRegisterRequest.getCheckPassword();
 
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            renderJson(Ret.fail("msg", PARAMS_ERROR));
+            renderJson(Ret.fail("message", PARAMS_ERROR));
         }
 
         long userId = userService.userRegister(userAccount, userPassword, checkPassword);
@@ -83,6 +82,9 @@ public class UserController extends JbootController {
             @ApiImplicitParam(name = "userPassword", value = "用户密码", paramType = ParamType.FORM, dataType = "string", required = true)})
 
     public void userLogin(@JsonBody UserLoginRequest userLoginRequest) {
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, getRequest());
@@ -105,17 +107,22 @@ public class UserController extends JbootController {
         }
 
         User user = new User();
+        if (userAddRequest.getUserAccount() == null) {
+            String defaultAvatar = "https://img.alicdn.com/imgextra/i1/O1CN01EI93PS1xWbnJ87dXX_!!6000000006451-2-tps-150-150.png";
+            user.setUserProfile(defaultAvatar);
+        } else {
+            user.setUserProfile(userAddRequest.getUserProfile());
+        }
         user.setUserName(userAddRequest.getUserName());
         user.setUserAccount(userAddRequest.getUserAccount());
-        user.setUserAvatar(userAddRequest.getUserAvatar());
         user.setUserRole(userAddRequest.getUserRole());
-
+        user.setUserAvatar(userAddRequest.getUserAvatar());
         // 默认密码 12345678
         String defaultPassword = "12345678";
         String encryptPassword = MD5.create().digestHex(((SALT + defaultPassword).getBytes()));
-
         user.setUserPassword(encryptPassword);
-        Object save = userService.save(user);
+        Object save = userService.addUser(user);
+
         renderJson(Ret.ok("data", save));
     }
 
@@ -146,7 +153,7 @@ public class UserController extends JbootController {
             @ApiImplicitParam(name = "userRole", value = "用户角色", paramType = ParamType.FORM, dataType = "string", required = true)})
     public void updateUser(@JsonBody UserUpdateRequest userUpdateRequest) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
-            renderJson(Ret.fail("data", false).set("msg", PARAMS_ERROR));
+            renderJson(Ret.fail("data", false).set("message", PARAMS_ERROR));
         }
         Long id = userUpdateRequest.getId();
         User updateUser = userService.findById(id);
@@ -155,12 +162,13 @@ public class UserController extends JbootController {
         updateUser.setUserAvatar(userUpdateRequest.getUserAvatar());
         updateUser.setUserProfile(userUpdateRequest.getUserProfile());
         updateUser.setUserRole(userUpdateRequest.getUserRole());
+
         boolean result = userService.update(updateUser);
 
         if (result) {
             renderJson(Ret.ok("data", true));
         } else {
-            renderJson(Ret.fail("msg", "更新失败"));
+            renderJson(Ret.fail("message", "更新失败"));
         }
     }
 
@@ -178,13 +186,13 @@ public class UserController extends JbootController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(getRequest());
-        User user = new User();
 
+        User user = new User();
         user.setUserName(userUpdateMyRequest.getUserName());
         user.setUserAvatar(userUpdateMyRequest.getUserAvatar());
         user.setUserProfile(userUpdateMyRequest.getUserProfile());
-
         user.setId(loginUser.getId());
+
         boolean result = userService.update(user);
         renderJson(Ret.ok("data", result));
     }
@@ -206,7 +214,7 @@ public class UserController extends JbootController {
         User user = userService.findById(id);
         User loginUser = userService.getLoginUser(getRequest());
         ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
-        renderJson(Ret.ok("msg", user));
+        renderJson(Ret.ok("message", user));
 
     }
 
@@ -277,6 +285,9 @@ public class UserController extends JbootController {
         Columns columns = new Columns();
         columns.eq("id", userPageRequest.getId());
         columns.eq("userAccount", userPageRequest.getUserAccount());
+        columns.eq("userName", userPageRequest.getUserName());
+        columns.eq("userProfile", userPageRequest.getUserProfile());
+        columns.eq("userRole", userPageRequest.getUserRole());
         Page<User> userPage = userService.paginateByColumns(current, pageSize, columns);
         renderJson(Ret.ok("data", userPage));
     }
@@ -289,10 +300,8 @@ public class UserController extends JbootController {
         columns.eq("userAccount", userPageRequest.getUserAccount());
         columns.eq("userName", userPageRequest.getUserName());
         columns.eq("userProfile", userPageRequest.getUserProfile());
-
         Page<User> userPage = userService.paginateByColumns(current, pageSize, columns);
         List<UserVO> userVO = userService.getUserVO(userPage.getList());
-        System.out.println("userVO = " + userVO);
         renderJson(Ret.ok("data", userVO));
     }
 
@@ -304,8 +313,9 @@ public class UserController extends JbootController {
     @GetRequest
     @ApiOperation(value = "获取当前登录用户", httpMethod = "Get", notes = "获取当前登录用户")
     public void getLoginUser() {
+
         User user = userService.getLoginUser(getRequest());
-        renderJson(userService.getLoginUserVO(user));
+        renderJson(Ret.ok("data", userService.getLoginUserVO(user)));
     }
 
     /**

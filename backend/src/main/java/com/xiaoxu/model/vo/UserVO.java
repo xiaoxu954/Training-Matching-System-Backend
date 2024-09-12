@@ -42,12 +42,17 @@ public class UserVO implements Serializable {
     private String userRole;
 
     /**
+     * 用户标签
+     */
+    private String tags;
+
+    /**
      * 创建时间
      */
     private Date createTime;
 
     /**
-     * 创建时间
+     * 更新时间
      */
     private Date updateTime;
 

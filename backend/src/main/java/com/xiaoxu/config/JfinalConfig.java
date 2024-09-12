@@ -27,7 +27,6 @@ public class JfinalConfig extends JFinalConfig {
     @Override
     public void configInterceptor(Interceptors interceptors) {
 //        interceptors.add(new SessionInViewInterceptor());
-
         //自定义异常拦截器
         interceptors.add(new ExceptionInterceptor());
 
@@ -36,6 +35,5 @@ public class JfinalConfig extends JFinalConfig {
 
     @Override
     public void configHandler(Handlers handlers) {
-
     }
 }

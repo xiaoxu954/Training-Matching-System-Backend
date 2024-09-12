@@ -27,9 +27,9 @@ public class CaptchaController extends JbootController {
     public void checkCode(@Para("code") String code) {
         boolean result = lineCaptcha.verify(code);//校验用户输入的验证码,result为true表示验证码正确
         if (result) {
-            renderJson(Ret.ok("msg", "验证码正确"));
+            renderJson(Ret.ok("message", "验证码正确"));
         } else {
-            renderJson(Ret.fail("msg", "验证码错误"));
+            renderJson(Ret.fail("message", "验证码错误"));
         }
     }
 

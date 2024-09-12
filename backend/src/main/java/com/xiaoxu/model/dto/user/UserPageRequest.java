@@ -36,6 +36,7 @@ public class UserPageRequest implements Serializable {
     private String userRole;
 
     private Integer current;
+
     private Integer pageSize;
 
     private static final long serialVersionUID = 1L;

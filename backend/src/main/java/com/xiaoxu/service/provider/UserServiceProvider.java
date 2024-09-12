@@ -61,6 +61,9 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
             User user = new User();
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
+            //todo 默认头像
+            String defaultAvatar = "https://img.alicdn.com/imgextra/i1/O1CN01EI93PS1xWbnJ87dXX_!!6000000006451-2-tps-150-150.png";
+            user.setUserProfile(defaultAvatar);
             this.save(user);
             return user.getId();
         }
@@ -89,16 +92,49 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
     }
 
     @Override
+    public long addUser(User user) {
+        // 1. 校验
+        if (StringUtils.isAnyBlank(user.getUserAccount(), user.getUserPassword())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (user.getUserAccount().length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
+        }
+        if (user.getUserPassword().length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
+        }
+        // 账户不能重复
+        long count = findCountByColumns(Columns.create("userAccount", user.getUserAccount()));
+        synchronized (user.getUserAccount().intern()) {
+
+            if (count > 0) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
+            }
+
+            // 2. 加密
+            String encryptPassword = MD5.create().digestHex(((SALT + user.getUserPassword()).getBytes()));
+            // 3. 插入数据
+            User addUser = new User();
+            addUser.setUserAccount(user.getUserAccount());
+            addUser.setUserPassword(encryptPassword);
+            this.save(addUser);
+            return addUser.getId();
+        }
+    }
+
+    @Override
     public LoginUserVO getLoginUserVO(User user) {
         if (user == null) {
             return null;
         }
         LoginUserVO loginUserVO = new LoginUserVO();
         loginUserVO.setId(user.getId());
+        loginUserVO.setUserAccount(user.getUserAccount());
         loginUserVO.setUserName(user.getUserName());
         loginUserVO.setUserAvatar(user.getUserAvatar());
         loginUserVO.setUserProfile(user.getUserProfile());
         loginUserVO.setUserRole(user.getUserRole());
+        loginUserVO.setTags(user.getTags());
         loginUserVO.setCreateTime(user.getCreateTime());
         loginUserVO.setUpdateTime(user.getUpdateTime());
         return loginUserVO;
@@ -118,6 +154,7 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         userVO.setUserRole(user.getUserRole());
         userVO.setCreateTime(user.getCreateTime());
         userVO.setUpdateTime(user.getUpdateTime());
+        userVO.setTags(user.getTags());
         return userVO;
     }
 

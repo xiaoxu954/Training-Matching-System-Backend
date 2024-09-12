@@ -187,6 +187,7 @@ public interface UserService {
      */
     long userRegister(String userAccount, String userPassword, String checkPassword);
 
+
     /**
      * 用户登录
      *
@@ -196,6 +197,13 @@ public interface UserService {
      * @return
      */
     LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
+
+    /**
+     * 添加用户
+     *
+     * @return
+     */
+    long addUser(User user);
 
     /**
      * 获取脱敏的已登录用户信息

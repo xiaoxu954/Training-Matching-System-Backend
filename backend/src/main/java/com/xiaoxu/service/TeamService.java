@@ -191,6 +191,16 @@ public interface TeamService {
      */
     public long addTeam(Team team, User loginUser);
 
+
+    /**
+     * 搜索队伍
+     *
+     * @param teamQueryRequest
+     * @param isAdmin
+     * @return
+     */
+    List<TeamUserVO> listTeam(TeamQueryRequest teamQueryRequest, boolean isAdmin);
+
     /**
      * 更新队伍
      *
@@ -198,42 +208,32 @@ public interface TeamService {
      * @param loginUser
      * @return
      */
-    public boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
-
-    /**
-     * 查询队伍（脱敏）
-     *
-     * @param teamQueryRequest
-     * @param isAdmin
-     * @return
-     */
-    public List<TeamUserVO> listTeam(TeamQueryRequest teamQueryRequest, boolean isAdmin);
+    boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
 
     /**
      * 加入队伍
      *
      * @param teamJoinRequest
-     * @param loginUser
      * @return
      */
-    public boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser);
+    long joinTeam(TeamJoinRequest teamJoinRequest, User loginUser);
 
     /**
      * 退出队伍
      *
      * @param teamQuitRequest
-     * @param loginUser
+     * @param userLogin
      * @return
      */
-    public boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
+    boolean quitTeam(TeamQuitRequest teamQuitRequest, User userLogin);
 
     /**
-     * 删除队伍
+     * 解散(删除)队伍
      *
      * @param id
-     * @param loginUser
      * @return
      */
-    public boolean deleteTeam(Long id, User loginUser);
+    boolean deleteTeam(long id, User loginUser);
+
 
 }

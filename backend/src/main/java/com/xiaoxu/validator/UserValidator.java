@@ -13,13 +13,13 @@
 //        //取得方法名
 //        String actionMethodName = getActionMethodName();
 //        if (actionMethodName.equals("userLogin")) {
-////            validateRequired("userAccount", "msg", "账号不能为空");
-////            validateRequired("userPassword", "msg", "密码不能为空");
+////            validateRequired("userAccount", "message", "账号不能为空");
+////            validateRequired("userPassword", "message", "密码不能为空");
 //
 //        } else if (actionMethodName.equals("userRegister")) {
-////            validateRequired("userAccount", "msg", "账号不能为空");
-////            validateRequired("userPassword", "msg", "密码不能为空");
-////            validateRequired("checkPassword", "msg", "确认密码不能为空");
+////            validateRequired("userAccount", "message", "账号不能为空");
+////            validateRequired("userPassword", "message", "密码不能为空");
+////            validateRequired("checkPassword", "message", "确认密码不能为空");
 //        }
 //    }
 //
