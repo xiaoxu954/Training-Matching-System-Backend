@@ -1,5 +1,6 @@
 package com.xiaoxu.model.vo;
 
+import com.xiaoxu.model.entity.User;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -9,7 +10,7 @@ import java.util.Date;
  * 用户视图（脱敏）
  */
 @Data
-public class UserVO implements Serializable {
+public class UserVO extends User implements Serializable {
 
     /**
      * id

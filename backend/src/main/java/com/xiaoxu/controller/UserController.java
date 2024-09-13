@@ -331,4 +331,45 @@ public class UserController extends JbootController {
         boolean result = userService.userLogout(request);
         renderJson(Ret.ok("data", result));
     }
+
+    @GetRequest
+    public void recommendUsers(int num, int pageSize) {
+        User loginUser = userService.getLoginUser(getRequest());
+        //todo  完成redis缓存
+        String redisKey = String.format("xiaoxu:user:recommend:%s", loginUser.getId());
+//        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        // 如果有缓存，直接读缓存
+//        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+//        if (userPage != null) {
+//            renderJson( Ret.ok( "data",userPage));
+//        }
+        // 无缓存，查数据库
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        Columns queryWrapper = new Columns();
+        Page<User> userPage = null;
+        userPage = userService.paginateByColumns(num, pageSize, queryWrapper);
+        for (User user : userPage.getList()) {
+            user.setUserPassword("");
+        }
+//        userPage = userService.page(new Page<>(pageNum, pageSize), queryWrapper);
+        // todo 写缓存
+//        try {
+//            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+//        } catch (Exception e) {
+//            log.error("redis set key error", e);
+//        }
+        renderJson(Ret.ok("data", userPage));
+    }
+
+    @GetRequest
+    public void matchUsers(long num) {
+        if (num <= 0 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getLoginUser(getRequest());
+        List<User> users = userService.matchUsers(num, user);
+        List<UserVO> userVO = userService.getUserVO(users);
+
+        renderJson(Ret.ok("data", userVO));
+    }
 }

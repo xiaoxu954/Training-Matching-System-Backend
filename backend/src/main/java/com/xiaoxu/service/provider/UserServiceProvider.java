@@ -3,6 +3,8 @@ package com.xiaoxu.service.provider;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.crypto.digest.MD5;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.xiaoxu.commom.ErrorCode;
 import com.xiaoxu.commom.UserConstant;
 import com.xiaoxu.exception.BusinessException;
@@ -10,14 +12,18 @@ import com.xiaoxu.model.entity.User;
 import com.xiaoxu.model.vo.LoginUserVO;
 import com.xiaoxu.model.vo.UserVO;
 import com.xiaoxu.service.UserService;
+import com.xiaoxu.utils.AlgorithmUtils;
 import io.jboot.aop.annotation.Bean;
 import io.jboot.db.model.Columns;
 import io.jboot.service.JbootServiceBase;
+import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.xiaoxu.commom.UserConstant.USER_LOGIN_STATE;
@@ -223,6 +229,77 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
     @Override
     public boolean isAdmin(User loginUser) {
         return loginUser != null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
+    }
+
+
+    /**
+     * 推荐匹配用户
+     *
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public List<User> matchUsers(long num, User loginUser) {
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        Columns queryWrapper = new Columns();
+
+        queryWrapper.isNotNull("tags");
+        // todo 校验
+//        queryWrapper.select("id", "tags");
+        List<User> userList = this.findListByColumns(queryWrapper);
+        String tags = loginUser.getTags();
+        Gson gson = new Gson();
+        List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
+        }.getType());
+        // 用户列表的下表 => 相似度'
+        List<Pair<User, Long>> list = new ArrayList<>();
+        // 依次计算当前用户和所有用户的相似度
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            String userTags = user.getTags();
+            //无标签的 或当前用户为自己
+            if (StringUtils.isBlank(userTags) || user.getId() == loginUser.getId()) {
+                continue;
+            }
+            List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
+            }.getType());
+            //计算分数
+            long distance = AlgorithmUtils.minDistance(tagList, userTagList);
+            list.add(new Pair<>(user, distance));
+        }
+        //按编辑距离有小到大排序
+        List<Pair<User, Long>> topUserPairList = list.stream()
+                .sorted((a, b) -> (int) (a.getValue() - b.getValue()))
+                .limit(num)
+                .collect(Collectors.toList());
+        //有顺序的userID列表
+        List<Long> userListVo = topUserPairList.stream()
+                .map(pari -> pari.getKey().getId()).collect(Collectors.toList());
+
+        //根据id查询user完整信息
+//        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        Columns userQueryWrapper = new Columns();
+        userQueryWrapper.in("id", userListVo);
+//        Map<Long, List<User>> userIdUserListMap = this.findListByColumns(userQueryWrapper).stream()
+//                .map(user -> getUserVO(user))
+//                .collect(Collectors.groupingBy(User::getId));
+//
+        Map<Long, List<UserVO>> userIdUserListMap = new HashMap<>();
+        for (User user : this.findListByColumns(userQueryWrapper)) {
+            UserVO userVO = getUserVO(user);
+            if (!userIdUserListMap.containsKey(userVO.getId())) {
+                userIdUserListMap.put(userVO.getId(), new ArrayList<>());
+            }
+            userIdUserListMap.get(userVO.getId()).add(userVO);
+        }
+
+        // 因为上面查询打乱了顺序，这里根据上面有序的userID列表赋值
+        List<User> finalUserList = new ArrayList<>();
+        for (Long userId : userListVo) {
+            finalUserList.add(userIdUserListMap.get(userId).get(0));
+        }
+        return finalUserList;
     }
 
 

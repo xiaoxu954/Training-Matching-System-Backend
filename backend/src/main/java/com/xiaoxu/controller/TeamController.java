@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@EnableCORS
+@EnableCORS(allowOrigin = "http://localhost:3002")
 @RequestMapping("/api/team")
 @Api(description = "队伍API", tags = "队伍接口")
 public class TeamController extends JbootController {
@@ -65,7 +65,6 @@ public class TeamController extends JbootController {
             @ApiImplicitParam(value = "userId", paramType = ParamType.FORM, dataType = "string", required = true),
             @ApiImplicitParam(value = "status", paramType = ParamType.FORM, dataType = "string", required = true)
     })
-
     @PostRequest
     public void addTeam(@JsonBody TeamAddRequest teamAddRequest) {
         if (teamAddRequest == null) {
@@ -131,7 +130,7 @@ public class TeamController extends JbootController {
         if (team == null) {
             throw new BusinessException(ErrorCode.MESSAGE_NULL);
         }
-        renderJson(Ret.of("data", team));
+        renderJson(Ret.ok("data", team));
     }
 
     /**
@@ -142,15 +141,20 @@ public class TeamController extends JbootController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "id", paramType = ParamType.FORM, dataType = "string", required = true),
     })
-    @PostRequest
-    @ApiOperation(value = "查询队伍列表", httpMethod = "Post", notes = "查询队伍列表")
-    public void listTeam(@JsonBody TeamQueryRequest teamQueryRequest) {
+    @ApiOperation(value = "查询队伍列表", httpMethod = "Get", notes = "查询队伍列表")
+    public void listTeam(TeamQueryRequest teamQueryRequest) {
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        String status = getPara("status");
+        String searchText = getPara("searchText");
+        String pageNum = getPara("pageNum");
+        teamQueryRequest.setStatus(Integer.valueOf(status));
+        teamQueryRequest.setCurrent(Integer.parseInt(pageNum));
+        teamQueryRequest.setSearchText(searchText);
         HttpServletRequest request = getRequest();
 
-        boolean isAdmin = userService.isAdmin(request);
+        boolean isAdmin = userService.isAdmin(getRequest());
         // 1、查询队伍列表
         List<TeamUserVO> teamList = teamService.listTeam(teamQueryRequest, isAdmin);
         // 2、判断当前用户是否已加入队伍
@@ -192,8 +196,7 @@ public class TeamController extends JbootController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "teamQueryRequest", value = "队伍查询请求", required = true, dataType = "TeamQueryRequest")
     })
-    @PostRequest
-    public void listTeamByPage(@JsonBody TeamQueryRequest teamQueryRequest) {
+    public void listTeamByPage(TeamQueryRequest teamQueryRequest) {
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -276,7 +279,9 @@ public class TeamController extends JbootController {
      * @param teamQueryRequest
      * @return
      */
-    public void listMyCreateTeam(@JsonBody TeamQueryRequest teamQueryRequest) {
+    @GetRequest
+    public void listMyCreateTeam(TeamQueryRequest teamQueryRequest) {
+
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -305,7 +310,7 @@ public class TeamController extends JbootController {
      * @param teamQueryRequest
      * @return
      */
-    public void listMyJoinTeam(@JsonBody TeamQueryRequest teamQueryRequest) {
+    public void listMyJoinTeam(TeamQueryRequest teamQueryRequest) {
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
