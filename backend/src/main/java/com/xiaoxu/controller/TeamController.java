@@ -177,7 +177,6 @@ public class TeamController extends JbootController {
         } catch (Exception e) {
         }
         // 3、查询已加入队伍的人数
-//        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
         userTeamJoinQueryWrapper.in("teamId", teamIdList);
         List<UserTeam> userTeamList = userTeamService.findListByColumns(userTeamJoinQueryWrapper);
         // 队伍 id => 加入这个队伍的用户列表
@@ -293,7 +292,6 @@ public class TeamController extends JbootController {
         // 2、判断当前用户是否已加入队伍
         List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
         // 3、查询已加入队伍的人数
-//        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
         Columns userTeamJoinQueryWrapper = new Columns();
 
         userTeamJoinQueryWrapper.in("teamId", teamIdList);
@@ -315,18 +313,17 @@ public class TeamController extends JbootController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(getRequest());
-//        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
         Columns queryWrapper = new Columns();
 
         queryWrapper.eq("userId", loginUser.getId());
         List<UserTeam> userTeamList = userTeamService.findListByColumns(queryWrapper);
+
         Map<Long, List<UserTeam>> listMap = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
         List<Long> idList = new ArrayList<>(listMap.keySet());
         teamQueryRequest.setIdList(idList);
         List<TeamUserVO> teamList = teamService.listTeam(teamQueryRequest, true);
         List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
         // 3、查询已加入队伍的人数
-//        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
         Columns userTeamJoinQueryWrapper = new Columns();
         userTeamJoinQueryWrapper.in("teamId", teamIdList);
         // 队伍 id => 加入这个队伍的用户列表

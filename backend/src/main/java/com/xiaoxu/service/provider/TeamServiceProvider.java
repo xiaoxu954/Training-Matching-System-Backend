@@ -119,7 +119,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
 
     @Override
     public List<TeamUserVO> listTeam(TeamQueryRequest teamQueryRequest, boolean isAdmin) {
-//        QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         Columns queryWrapper = new Columns();
         //组合查询条件
         if (teamQueryRequest != null) {
@@ -281,7 +280,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
         }
         //该用户已加入的队伍数量
         Long userId = loginUser.getId();
-//        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
         Columns userTeamQueryWrapper = new Columns();
 
         userTeamQueryWrapper.eq("userId", userId);
@@ -292,7 +290,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
 
         }
         //不能重复加入已加入的队伍
-//        userTeamQueryWrapper = new QueryWrapper<>();
         userTeamQueryWrapper = new Columns();
         userTeamQueryWrapper.eq("userId", userId);
         userTeamQueryWrapper.eq("teamId", teamId);
@@ -354,7 +351,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
             if (team.getUserId().equals(userId)) {
                 // 把队伍转移给最早加入的用户
                 // 1. 查询已加入队伍的所有用户和加入时间
-//                QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
                 Columns userTeamQueryWrapper = new Columns();
                 userTeamQueryWrapper.eq("teamId", teamId);
                 //todo  校验是否有用
@@ -391,7 +387,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无访问权限");
         }
         // 移除所有加入队伍的关联信息
-//        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
         Columns userTeamQueryWrapper = new Columns();
 
         userTeamQueryWrapper.eq("teamId", teamId);
@@ -429,7 +424,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
      * @return
      */
     private long getTeamUserByTeamId(long teamId) {
-//        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
         Columns userTeamQueryWrapper = new Columns();
         userTeamQueryWrapper.eq("teamId", teamId);
         return userTeamService.findCountByColumns(userTeamQueryWrapper);

@@ -20,10 +20,7 @@ import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaoxu.commom.UserConstant.USER_LOGIN_STATE;
@@ -241,7 +238,6 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
      */
     @Override
     public List<User> matchUsers(long num, User loginUser) {
-//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         Columns queryWrapper = new Columns();
 
         queryWrapper.isNotNull("tags");
@@ -278,7 +274,6 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
                 .map(pari -> pari.getKey().getId()).collect(Collectors.toList());
 
         //根据id查询user完整信息
-//        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         Columns userQueryWrapper = new Columns();
         userQueryWrapper.in("id", userListVo);
 //        Map<Long, List<User>> userIdUserListMap = this.findListByColumns(userQueryWrapper).stream()
@@ -302,5 +297,36 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         return finalUserList;
     }
 
+    @Override
+    public List<User> searchUsersByTags(List<String> tagNameList) {
+        if (CollUtil.isEmpty(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //1.先查询所有用户
+        Columns queryWrapper = new Columns();
+        List<User> userList = this.findListByColumns(queryWrapper);
+
+        Gson gson = new Gson();
+        //2.判断内存中是否包含要求的标签 parallelStream()  从内存中取
+        //对每一个user进行过滤
+        return userList.parallelStream().filter(user -> {
+            //获取用户标签
+            String userTags = user.getTags();
+            //将json字符串转换为Set
+            Set<String> tempTagNameSet = gson.fromJson(userTags, new TypeToken<Set<String>>() {
+            }.getType());
+            //判断用户标签是否包含要求的标签
+            tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
+            //循环遍历搜索出的每一个用户
+            for (String tagName : tagNameList) {
+                // 如果用户标签不包含要求的标签，则返回false
+                if (!tempTagNameSet.contains(tagName)) {
+                    return false;
+                }
+            }
+            return true;
+        }).collect(Collectors.toList());
+    }
 
 }
+

@@ -1,5 +1,6 @@
 package com.xiaoxu.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.jfinal.aop.Inject;
 import com.jfinal.ext.cors.EnableCORS;
@@ -28,7 +29,9 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.xiaoxu.commom.ErrorCode.PARAMS_ERROR;
 import static com.xiaoxu.service.provider.UserServiceProvider.SALT;
@@ -267,7 +270,6 @@ public class UserController extends JbootController {
     /**
      * 分页查询用户
      */
-    @PostRequest
     @ApiOperation(value = "分页查询用户", httpMethod = "Post", notes = "分页查询用户")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "current", value = "当前页", paramType = ParamType.QUERY, dataType = "int", required = true),
@@ -278,7 +280,7 @@ public class UserController extends JbootController {
             @ApiImplicitParam(name = "userProfile", value = "用户简介", paramType = ParamType.QUERY, dataType = "String", required = true),
             @ApiImplicitParam(name = "userAvatar", value = "用户头像", paramType = ParamType.QUERY, dataType = "String", required = true),
     })
-
+    @PostRequest
     public void findUserByPage(@JsonBody UserPageRequest userPageRequest) {
         int current = userPageRequest.getCurrent();
         int pageSize = userPageRequest.getPageSize();
@@ -289,6 +291,13 @@ public class UserController extends JbootController {
         columns.eq("userProfile", userPageRequest.getUserProfile());
         columns.eq("userRole", userPageRequest.getUserRole());
         Page<User> userPage = userService.paginateByColumns(current, pageSize, columns);
+
+        //todo  实现管理员查看密码
+        //修改加密算法 做到解析密码
+        for (User user : userPage.getList()) {
+            user.setUserPassword("");
+        }
+
         renderJson(Ret.ok("data", userPage));
     }
 
@@ -344,7 +353,6 @@ public class UserController extends JbootController {
 //            renderJson( Ret.ok( "data",userPage));
 //        }
         // 无缓存，查数据库
-//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         Columns queryWrapper = new Columns();
         Page<User> userPage = null;
         userPage = userService.paginateByColumns(num, pageSize, queryWrapper);
@@ -361,6 +369,10 @@ public class UserController extends JbootController {
         renderJson(Ret.ok("data", userPage));
     }
 
+    /**
+     * 根据标签匹配用户
+     * @param num
+     */
     @GetRequest
     public void matchUsers(long num) {
         if (num <= 0 || num > 20) {
@@ -371,5 +383,17 @@ public class UserController extends JbootController {
         List<UserVO> userVO = userService.getUserVO(users);
 
         renderJson(Ret.ok("data", userVO));
+    }
+
+    //根据标签查询用户
+    @GetRequest
+    public void searchUsersByTags() {
+        Map<String, String[]> tagMap = getParaMap();
+        List<String> tagNameList = Arrays.asList(tagMap.get("tagNameList"));
+        if (CollUtil.isEmpty(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> userList = userService.searchUsersByTags(tagNameList);
+        renderJson(Ret.ok("data", userList));
     }
 }

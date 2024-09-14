@@ -272,4 +272,11 @@ public interface UserService {
      */
     List<User> matchUsers(long num, User loginUser);
 
+    /**
+     * 根据标签搜索用户
+     *
+     * @param tagNameList
+     * @return
+     */
+    List<User> searchUsersByTags(List<String> tagNameList);
 }
