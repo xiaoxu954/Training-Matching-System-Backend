@@ -1,12 +1,16 @@
 package com.xiaoxu.service;
 
+
 import com.jfinal.plugin.activerecord.Page;
-import com.xiaoxu.model.entity.UserTeam;
+import com.xiaoxu.model.dto.friend.FriendQueryRequest;
+import com.xiaoxu.model.entity.Friend;
+import com.xiaoxu.model.vo.UserVO;
 import io.jboot.db.model.Columns;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-public interface UserTeamService {
+public interface FriendService {
 
     /**
      * 根据主键查找Model
@@ -14,7 +18,7 @@ public interface UserTeamService {
      * @param id
      * @return
      */
-    public UserTeam findById(Object id);
+    public Friend findById(Object id);
 
 
     /**
@@ -23,7 +27,7 @@ public interface UserTeamService {
      * @param columns
      * @return
      */
-    public UserTeam findFirstByColumns(Columns columns);
+    public Friend findFirstByColumns(Columns columns);
 
     /**
      * 根据 Columns 查找单条数据
@@ -32,7 +36,7 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public UserTeam findFirstByColumns(Columns columns, String orderBy);
+    public Friend findFirstByColumns(Columns columns, String orderBy);
 
 
     /**
@@ -40,7 +44,7 @@ public interface UserTeamService {
      *
      * @return
      */
-    public List<UserTeam> findAll();
+    public List<Friend> findAll();
 
 
     /**
@@ -49,7 +53,7 @@ public interface UserTeamService {
      * @param columns
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns);
+    public List<Friend> findListByColumns(Columns columns);
 
 
     /**
@@ -59,7 +63,7 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, String orderBy);
+    public List<Friend> findListByColumns(Columns columns, String orderBy);
 
     /**
      * 根据 Columns 查找数据
@@ -68,7 +72,7 @@ public interface UserTeamService {
      * @param count
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, Integer count);
+    public List<Friend> findListByColumns(Columns columns, Integer count);
 
     /**
      * 根据 Columns 查找数据
@@ -78,7 +82,7 @@ public interface UserTeamService {
      * @param count
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, String orderBy, Integer count);
+    public List<Friend> findListByColumns(Columns columns, String orderBy, Integer count);
 
 
     /**
@@ -105,7 +109,7 @@ public interface UserTeamService {
      * @param model
      * @return
      */
-    public boolean delete(UserTeam model);
+    public boolean delete(Friend model);
 
 
     /**
@@ -123,7 +127,7 @@ public interface UserTeamService {
      * @param model
      * @return id if success
      */
-    public Object save(UserTeam model);
+    public Object save(Friend model);
 
 
     /**
@@ -132,7 +136,7 @@ public interface UserTeamService {
      * @param model
      * @return id if success
      */
-    public Object saveOrUpdate(UserTeam model);
+    public Object saveOrUpdate(Friend model);
 
     /**
      * 更新
@@ -140,7 +144,7 @@ public interface UserTeamService {
      * @param model
      * @return
      */
-    public boolean update(UserTeam model);
+    public boolean update(Friend model);
 
 
     /**
@@ -150,7 +154,7 @@ public interface UserTeamService {
      * @param pageSize
      * @return
      */
-    public Page<UserTeam> paginate(int page, int pageSize);
+    public Page<Friend> paginate(int page, int pageSize);
 
 
     /**
@@ -160,7 +164,7 @@ public interface UserTeamService {
      * @param pageSize
      * @return
      */
-    public Page<UserTeam> paginateByColumns(int page, int pageSize, Columns columns);
+    public Page<Friend> paginateByColumns(int page, int pageSize, Columns columns);
 
 
     /**
@@ -172,9 +176,13 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public Page<UserTeam> paginateByColumns(int page, int pageSize, Columns columns, String orderBy);
+    public Page<Friend> paginateByColumns(int page, int pageSize, Columns columns, String orderBy);
 
 
-    boolean teamHasUser(long teamId, long userId);
+    boolean addFriend(long userId, long friendId);
+
+    List<UserVO> listFriends(Long userId, HttpServletRequest request);
+
+    List<UserVO> searchFriends(FriendQueryRequest friendQueryRequest, long userId);
 
 }

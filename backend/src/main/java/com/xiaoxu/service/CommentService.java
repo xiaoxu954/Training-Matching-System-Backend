@@ -1,12 +1,13 @@
 package com.xiaoxu.service;
 
+
 import com.jfinal.plugin.activerecord.Page;
-import com.xiaoxu.model.entity.UserTeam;
+import com.xiaoxu.model.entity.Comment;
 import io.jboot.db.model.Columns;
 
 import java.util.List;
 
-public interface UserTeamService {
+public interface CommentService {
 
     /**
      * 根据主键查找Model
@@ -14,7 +15,7 @@ public interface UserTeamService {
      * @param id
      * @return
      */
-    public UserTeam findById(Object id);
+    public Comment findById(Object id);
 
 
     /**
@@ -23,7 +24,7 @@ public interface UserTeamService {
      * @param columns
      * @return
      */
-    public UserTeam findFirstByColumns(Columns columns);
+    public Comment findFirstByColumns(Columns columns);
 
     /**
      * 根据 Columns 查找单条数据
@@ -32,7 +33,7 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public UserTeam findFirstByColumns(Columns columns, String orderBy);
+    public Comment findFirstByColumns(Columns columns, String orderBy);
 
 
     /**
@@ -40,7 +41,7 @@ public interface UserTeamService {
      *
      * @return
      */
-    public List<UserTeam> findAll();
+    public List<Comment> findAll();
 
 
     /**
@@ -49,7 +50,7 @@ public interface UserTeamService {
      * @param columns
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns);
+    public List<Comment> findListByColumns(Columns columns);
 
 
     /**
@@ -59,7 +60,7 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, String orderBy);
+    public List<Comment> findListByColumns(Columns columns, String orderBy);
 
     /**
      * 根据 Columns 查找数据
@@ -68,7 +69,7 @@ public interface UserTeamService {
      * @param count
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, Integer count);
+    public List<Comment> findListByColumns(Columns columns, Integer count);
 
     /**
      * 根据 Columns 查找数据
@@ -78,7 +79,7 @@ public interface UserTeamService {
      * @param count
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, String orderBy, Integer count);
+    public List<Comment> findListByColumns(Columns columns, String orderBy, Integer count);
 
 
     /**
@@ -105,7 +106,7 @@ public interface UserTeamService {
      * @param model
      * @return
      */
-    public boolean delete(UserTeam model);
+    public boolean delete(Comment model);
 
 
     /**
@@ -123,7 +124,7 @@ public interface UserTeamService {
      * @param model
      * @return id if success
      */
-    public Object save(UserTeam model);
+    public Object save(Comment model);
 
 
     /**
@@ -132,7 +133,7 @@ public interface UserTeamService {
      * @param model
      * @return id if success
      */
-    public Object saveOrUpdate(UserTeam model);
+    public Object saveOrUpdate(Comment model);
 
     /**
      * 更新
@@ -140,7 +141,7 @@ public interface UserTeamService {
      * @param model
      * @return
      */
-    public boolean update(UserTeam model);
+    public boolean update(Comment model);
 
 
     /**
@@ -150,7 +151,7 @@ public interface UserTeamService {
      * @param pageSize
      * @return
      */
-    public Page<UserTeam> paginate(int page, int pageSize);
+    public Page<Comment> paginate(int page, int pageSize);
 
 
     /**
@@ -160,7 +161,7 @@ public interface UserTeamService {
      * @param pageSize
      * @return
      */
-    public Page<UserTeam> paginateByColumns(int page, int pageSize, Columns columns);
+    public Page<Comment> paginateByColumns(int page, int pageSize, Columns columns);
 
 
     /**
@@ -172,9 +173,7 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public Page<UserTeam> paginateByColumns(int page, int pageSize, Columns columns, String orderBy);
+    public Page<Comment> paginateByColumns(int page, int pageSize, Columns columns, String orderBy);
 
-
-    boolean teamHasUser(long teamId, long userId);
 
 }

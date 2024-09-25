@@ -32,6 +32,7 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
      */
     public static final String SALT = "xiaoxu";
 
+
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
@@ -297,6 +298,12 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
         return finalUserList;
     }
 
+    /**
+     * 根据标签搜索用户
+     *
+     * @param tagNameList
+     * @return
+     */
     @Override
     public List<User> searchUsersByTags(List<String> tagNameList) {
         if (CollUtil.isEmpty(tagNameList)) {
@@ -327,6 +334,7 @@ public class UserServiceProvider extends JbootServiceBase<User> implements UserS
             return true;
         }).collect(Collectors.toList());
     }
+
 
 }
 

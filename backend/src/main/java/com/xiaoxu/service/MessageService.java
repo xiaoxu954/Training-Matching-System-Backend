@@ -1,12 +1,21 @@
 package com.xiaoxu.service;
 
+
 import com.jfinal.plugin.activerecord.Page;
-import com.xiaoxu.model.entity.UserTeam;
+import com.xiaoxu.model.dto.message.MessageQueryRequest;
+import com.xiaoxu.model.entity.Message;
+import com.xiaoxu.model.vo.InteractionMessageVO;
+import com.xiaoxu.model.vo.MessageVO;
 import io.jboot.db.model.Columns;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-public interface UserTeamService {
+/**
+ *
+ */
+public interface MessageService {
+
 
     /**
      * 根据主键查找Model
@@ -14,7 +23,7 @@ public interface UserTeamService {
      * @param id
      * @return
      */
-    public UserTeam findById(Object id);
+    public Message findById(Object id);
 
 
     /**
@@ -23,7 +32,7 @@ public interface UserTeamService {
      * @param columns
      * @return
      */
-    public UserTeam findFirstByColumns(Columns columns);
+    public Message findFirstByColumns(Columns columns);
 
     /**
      * 根据 Columns 查找单条数据
@@ -32,7 +41,7 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public UserTeam findFirstByColumns(Columns columns, String orderBy);
+    public Message findFirstByColumns(Columns columns, String orderBy);
 
 
     /**
@@ -40,7 +49,7 @@ public interface UserTeamService {
      *
      * @return
      */
-    public List<UserTeam> findAll();
+    public List<Message> findAll();
 
 
     /**
@@ -49,7 +58,7 @@ public interface UserTeamService {
      * @param columns
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns);
+    public List<Message> findListByColumns(Columns columns);
 
 
     /**
@@ -59,7 +68,7 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, String orderBy);
+    public List<Message> findListByColumns(Columns columns, String orderBy);
 
     /**
      * 根据 Columns 查找数据
@@ -68,7 +77,7 @@ public interface UserTeamService {
      * @param count
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, Integer count);
+    public List<Message> findListByColumns(Columns columns, Integer count);
 
     /**
      * 根据 Columns 查找数据
@@ -78,7 +87,7 @@ public interface UserTeamService {
      * @param count
      * @return
      */
-    public List<UserTeam> findListByColumns(Columns columns, String orderBy, Integer count);
+    public List<Message> findListByColumns(Columns columns, String orderBy, Integer count);
 
 
     /**
@@ -105,7 +114,7 @@ public interface UserTeamService {
      * @param model
      * @return
      */
-    public boolean delete(UserTeam model);
+    public boolean delete(Message model);
 
 
     /**
@@ -123,7 +132,7 @@ public interface UserTeamService {
      * @param model
      * @return id if success
      */
-    public Object save(UserTeam model);
+    public Object save(Message model);
 
 
     /**
@@ -132,7 +141,7 @@ public interface UserTeamService {
      * @param model
      * @return id if success
      */
-    public Object saveOrUpdate(UserTeam model);
+    public Object saveOrUpdate(Message model);
 
     /**
      * 更新
@@ -140,7 +149,7 @@ public interface UserTeamService {
      * @param model
      * @return
      */
-    public boolean update(UserTeam model);
+    public boolean update(Message model);
 
 
     /**
@@ -150,7 +159,7 @@ public interface UserTeamService {
      * @param pageSize
      * @return
      */
-    public Page<UserTeam> paginate(int page, int pageSize);
+    public Page<Message> paginate(int page, int pageSize);
 
 
     /**
@@ -160,7 +169,7 @@ public interface UserTeamService {
      * @param pageSize
      * @return
      */
-    public Page<UserTeam> paginateByColumns(int page, int pageSize, Columns columns);
+    public Page<Message> paginateByColumns(int page, int pageSize, Columns columns);
 
 
     /**
@@ -172,9 +181,17 @@ public interface UserTeamService {
      * @param orderBy
      * @return
      */
-    public Page<UserTeam> paginateByColumns(int page, int pageSize, Columns columns, String orderBy);
+    public Page<Message> paginateByColumns(int page, int pageSize, Columns columns, String orderBy);
 
 
-    boolean teamHasUser(long teamId, long userId);
+    public boolean addStarMessage(Message message);
 
+    public boolean addLikeMessage(Message message);
+
+    public boolean addFollowMessage(Message message);
+
+    InteractionMessageVO listInteractionMessage(HttpServletRequest request);
+
+
+    List<MessageVO> listMessages(MessageQueryRequest messageQueryRequest, HttpServletRequest request);
 }

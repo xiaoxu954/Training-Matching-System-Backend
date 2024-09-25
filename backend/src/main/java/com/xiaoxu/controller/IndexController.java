@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-@EnableCORS
+@EnableCORS(allowOrigin = "http://localhost:3002")
 @RequestMapping("/")
 public class IndexController extends JbootController {
 

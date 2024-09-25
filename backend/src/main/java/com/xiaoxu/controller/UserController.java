@@ -322,7 +322,6 @@ public class UserController extends JbootController {
     @GetRequest
     @ApiOperation(value = "获取当前登录用户", httpMethod = "Get", notes = "获取当前登录用户")
     public void getLoginUser() {
-
         User user = userService.getLoginUser(getRequest());
         renderJson(Ret.ok("data", userService.getLoginUserVO(user)));
     }
@@ -371,6 +370,7 @@ public class UserController extends JbootController {
 
     /**
      * 根据标签匹配用户
+     *
      * @param num
      */
     @GetRequest

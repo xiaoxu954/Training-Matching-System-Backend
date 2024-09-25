@@ -2,7 +2,6 @@ package com.xiaoxu.service.provider;
 
 
 import cn.hutool.core.collection.CollUtil;
-import com.jfinal.aop.Inject;
 import com.xiaoxu.commom.ErrorCode;
 import com.xiaoxu.exception.BusinessException;
 import com.xiaoxu.model.dto.team.TeamJoinRequest;
@@ -29,16 +28,16 @@ import java.util.*;
 public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamService {
 
 
-    @Inject
-    private UserService userService;
+    private UserService userService = new UserServiceProvider();
 
-    @Inject
-    private UserTeamService userTeamService;
+
+    private UserTeamService userTeamService = new UserTeamServiceProvider();
 
 
     @Override
     public long addTeam(Team team, User loginUser) {
         //1. 请求参数是否为空？
+
         if (team == null) {
             throw new BusinessException(ErrorCode.MESSAGE_NULL);
         }
@@ -183,7 +182,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
             User user = userService.findById(userId);
             TeamUserVO teamUserVO = new TeamUserVO();
 
-//            BeanUtils.copyProperties(team, teamUserVO);
             // 赋值
             teamUserVO.setId(team.getId());
             teamUserVO.setName(team.getName());
@@ -198,8 +196,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
             // 脱敏用户信息
             if (user != null) {
                 UserVO userVO = new UserVO();
-
-//                BeanUtils.copyProperties(user, userVO);
                 // 赋值
                 userVO.setId(user.getId());
                 userVO.setUserAccount(user.getUserAccount());
@@ -241,7 +237,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
         }
         Team updateTeam = new Team();
 
-//        BeanUtils.copyProperties(teamUpdateRequest, updateTeam);
         updateTeam.setId(teamUpdateRequest.getId());
         updateTeam.setName(teamUpdateRequest.getName());
         updateTeam.setDescription(teamUpdateRequest.getDescription());
@@ -353,7 +348,7 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
                 // 1. 查询已加入队伍的所有用户和加入时间
                 Columns userTeamQueryWrapper = new Columns();
                 userTeamQueryWrapper.eq("teamId", teamId);
-                //todo  校验是否有用
+                //todo  校验
                 userTeamQueryWrapper.sqlPart("order by id asc limit 2");
                 List<UserTeam> userTeamList = userTeamService.findListByColumns(userTeamQueryWrapper);
                 if (CollUtil.isEmpty(userTeamList) || userTeamList.size() <= 1) {
@@ -402,9 +397,6 @@ public class TeamServiceProvider extends JbootServiceBase<Team> implements TeamS
 
     /**
      * 根据id获取队伍信息
-     *
-     * @param teamId
-     * @return
      */
     private Team getTeamById(Long teamId) {
         if (teamId == null || teamId < 0) {

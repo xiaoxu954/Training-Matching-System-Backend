@@ -199,14 +199,9 @@ public class TeamController extends JbootController {
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-//        Team team = new Team();
-//        team.setId(teamQueryRequest.getId());
-//        team.setName(teamQueryRequest.getName());
-//        team.setDescription(teamQueryRequest.getDescription());
-//        team.setStatus(teamQueryRequest.getStatus());
-//        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
+
         Columns teamQueryWrapper = new Columns();
-//        teamQueryWrapper.eq("id", teamQueryRequest.getId());
+
         teamQueryWrapper.eq("name", teamQueryRequest.getName());
         teamQueryWrapper.eq("description", teamQueryRequest.getDescription());
         teamQueryWrapper.eq("maxNum", teamQueryRequest.getMaxNum());
@@ -308,6 +303,7 @@ public class TeamController extends JbootController {
      * @param teamQueryRequest
      * @return
      */
+    //todo 修复bug 若未加入任何队伍 将查出所有公开队伍返回
     public void listMyJoinTeam(TeamQueryRequest teamQueryRequest) {
         if (teamQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -328,6 +324,7 @@ public class TeamController extends JbootController {
         userTeamJoinQueryWrapper.in("teamId", teamIdList);
         // 队伍 id => 加入这个队伍的用户列表
         Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+
         teamList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size()));
         renderJson(Ret.ok("data", teamList));
     }

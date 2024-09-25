@@ -8,7 +8,7 @@ import com.jfinal.kit.Ret;
 import io.jboot.web.controller.JbootController;
 import io.jboot.web.controller.annotation.RequestMapping;
 
-@EnableCORS
+@EnableCORS(allowOrigin = "http://localhost:3002")
 @RequestMapping("/captcha")
 public class CaptchaController extends JbootController {
 
